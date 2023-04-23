@@ -1,0 +1,53 @@
+const express = require('express')
+const searchModel = require('../Models/searchModel')
+const router = express.Router()
+router.get('/search/company/:key', async (req, res) => {
+    const searchResults = await searchModel.find({
+        companyId: { $eq: parseInt(req.params.key) }
+    });
+    res.send(searchResults);
+    console.log(searchResults);
+});
+router.get('/search/headline/:search', async (req, res) => {
+    const searchResults = await searchModel.find({
+        headline: { $regex: req.params.search, $options: 'i' }
+    });
+    res.send(searchResults);
+    console.log(searchResults);
+});
+module.exports = router
+7:31
+import { useState } from 'react';
+import axios from 'axios';
+import { useParams } from 'react-router-dom';
+function SearchBar() {
+  const [searchQuery, setSearchQuery] = useState('');
+  const { key } = useParams();
+  const handleSearchInputChange = (event) => {
+    setSearchQuery(event.target.value);
+  };
+  const handleSearchSubmit = async (event) => {
+    event.preventDefault();
+    try {
+      if (!isNaN(searchQuery)) {
+        const responseCompany = await axios.get(`http://localhost:4000/api/search/company/${searchQuery}`);
+        console.log(responseCompany.data);
+      } else {
+        const responseHeadline = await axios.get(`http://localhost:4000/api/search/headline/${searchQuery}`);
+        console.log(responseHeadline.data);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  return (
+    <form onSubmit={handleSearchSubmit}>
+      <label>
+        Search:
+        <input type="text" value={searchQuery} onChange={handleSearchInputChange} />
+      </label>
+      <button type="submit">Submit</button>
+    </form>
+  );
+}
+export default SearchBar;
